@@ -6,14 +6,12 @@
 /*   By: Rustam <super.rustamm@gmail.com>           +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2019/11/28 16:31:03 by Rustam            #+#    #+#             */
-/*   Updated: 2020/01/05 20:16:27 by Rustam           ###   ########.fr       */
+/*   Updated: 2020/01/05 20:12:45 by Rustam           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef CLASS_VECTOR_HPP
 # define CLASS_VECTOR_HPP
-
-# include "astra.hpp"
 
 class Vector
 {
