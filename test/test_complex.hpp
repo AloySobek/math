@@ -59,6 +59,26 @@ TEST_CASE("Complex number multiplication") {
     CHECK(check);
 }
 
+TEST_CASE("Complex number multiplication") {
+    Complex<int> product = Complex<int>(3, 7) * Complex<int>(11, 17);
+
+    bool check = product == Complex<int>(-86, 128) && product.a() == -86 && product.b() == 128;
+
+    CHECK(check);
+
+    product = Complex<int>(0, 0) * Complex<int>(0, 0);
+
+    check = product == Complex<int>(0, 0) && product.a() == 0 && product.b() == 0;
+
+    CHECK(check);
+
+    product = Complex<int>(-3, -7) * Complex<int>(-11, -17);
+
+    check = product == Complex<int>(-86, 128) && product.a() == -86 && product.b() == 128;
+
+    CHECK(check);
+}
+
 TEST_CASE("Random complex number addition") {
     std::random_device rd;
 
@@ -82,7 +102,7 @@ TEST_CASE("Random complex number addition") {
     }
 }
 
-TEST_CASE("Random complex number addition") {
+TEST_CASE("Random complex number multiplication") {
     std::random_device rd;
     std::mt19937 gen(rd());
     std::uniform_int_distribution<> distr(-100, 100);
