@@ -1,7 +1,6 @@
 #include <type_traits>
 
-// A complex number is an ordered pair (a,b) where a and b ∈ R
-// The set of all complex numbers is denoted as C
+// C = {a + bi : a, b ∈ R}
 template <typename T> class Complex {
   public:
     Complex() : _a{0}, _b{0} {}
@@ -30,6 +29,11 @@ template <typename T> class Complex {
     Complex<T> operator*(const Complex<T> &b) const {
         return Complex<T>((_a * b._a - _b * b._b), (_a * b._b + _b * b._a));
     }
+    // a * B = a(c + di) = ac + adi
+    template <typename S> Complex<T> operator*(S scalar) const {
+        return Complex<T>(_a * scalar, _b * scalar);
+    }
+    Complex<T> operator-() const { return Complex<T>(_a, _b) * -1; }
 
     T a() const { return _a; }
     T b() const { return _b; }
@@ -40,3 +44,18 @@ template <typename T> class Complex {
     T _a; // a ∈ R
     T _b; // b ∈ R
 };
+
+// Fun facts:
+// i^2 = -1
+// a + 0i = a ∈ R
+// 0 + bi = bi ∈ C
+// 0 + 1i = i ∈ C
+// R ⊂ C
+
+// Properties
+// Commutativity: a + b = b + a && ab = ba for all a, b ∈ C
+// Associativity: (a + b) + c = a + (b + c) && (ab)c = a(bc) for all a, b, c ∈ C
+// Identities: a + 0 = a && a * 1 = a for all a ∈ C
+// Additive inverse: For every a ∈ C, there exists a unique b ∈ C such that a + b = 0
+// Multiplicative inverse: For every a ∈ C, there exists a unique b ∈ C such that ab = 1
+// Distributive: a(b + c) = ab + ac for all a, b, c ∈ C
