@@ -8,6 +8,28 @@
 #define GLSL_VERSION 330
 #endif
 
+class Page {
+  public:
+    Page() = default;
+
+    virtual void draw();
+
+    virtual ~Page() {}
+
+  private:
+};
+
+class UI {
+  public:
+    UI() {}
+
+    void draw() {}
+
+    ~UI() {}
+
+  private:
+};
+
 class Render {
   public:
     Render() {}
@@ -18,6 +40,7 @@ class Render {
         {
             ClearBackground(BLACK);
 
+            draw_text();
             draw_axis();
         }
 
@@ -28,6 +51,14 @@ class Render {
 
   private:
     Complex<float> number{0.0f, 7.0f};
+
+    void draw_text() {
+        const char *text = "Postulates";
+
+        int size = MeasureText(text, 50);
+
+        DrawText(text, GetScreenWidth() / 2 - (size / 2), GetScreenHeight() / 10, 50, WHITE);
+    }
 
     void draw_axis() {
         const float height = GetScreenHeight();
