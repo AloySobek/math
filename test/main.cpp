@@ -2,3 +2,4 @@
 #include <doctest.h>
 
 #include "test/test_complex.hpp"
+#include "test/test_vector.hpp"
