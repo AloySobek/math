@@ -1,3 +1,6 @@
+#include <cstdint>
+#include <functional>
+#include <glm/glm.hpp>
 #include <iostream>
 
 template <typename T> class Vector {
@@ -7,7 +10,11 @@ template <typename T> class Vector {
     T z;
     T w;
 
-    Vector() : x{0}, y{0}, z{0}, w{0} {}
+    Vector() : x{0}, y{0}, z{0}, w{0} {
+        glm::vec4 v;
+
+        v;
+    }
     Vector(T x);
     Vector(T x, T y);
     Vector(T x, T y, T z);

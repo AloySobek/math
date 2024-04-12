@@ -1,6 +1,36 @@
+#include <algorithm>
 #include <cstdint>
 #include <functional>
+#include <optional>
 #include <vector>
+
+template <typename T, uint64_t N> class Vec {
+  public:
+    Vec() : v{N, 0} {}
+    Vec(std::initializer_list<T> args) : v{N, 0} {}
+    Vec(const std::function<T(uint64_t)> initializer) : v{N, 0} {
+        for (uint64_t i{0}; i < v.size(); ++i) {
+            v[i] = initializer(i);
+        }
+    }
+
+    Vec<T, N> add(const Vec<T, N> &other) const {
+        return Vec<T, N>{[&](uint64_t i) -> T { return this->v[i] + other.v[i]; }};
+    }
+
+    std::optional<T> at(const uint64_t i) const {
+        if (i < v.size()) {
+            return v[i];
+        }
+
+        return std::nullopt;
+    }
+
+    ~Vec() {}
+
+  private:
+    const std::vector<T> v;
+};
 
 template <typename T, uint64_t N> class V {
   public:
