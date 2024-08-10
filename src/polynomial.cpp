@@ -2,26 +2,18 @@
 
 namespace polynomial {
 
-Term::Term(double coefficient, int exponent) : coefficient{coefficient}, exponent{exponent} {}
+Term::Term(std::string str) {
+    coefficient = std::stod(str.substr(0, str.find("*") - 1));
+    exponent = std::stoi(str.substr(str.find("^") + 1, str.length()));
+}
 
-Term::Term(std::string str) { from_str(str); }
+Term::Term(double coefficient, unsigned int exponent)
+    : coefficient{coefficient}, exponent{exponent} {}
 
 Term::Term(const Term &another) {
     coefficient = another.coefficient;
     exponent = another.exponent;
 }
-
-void Term::from_str(std::string str) {
-    coefficient = std::stod(str.substr(0, str.find("*") - 1));
-    exponent = std::stoi(str.substr(str.find("^") + 1, str.length()));
-}
-
-std::string Term::to_str() const {
-    return ((std::ostringstream()) << coefficient).str() + " * X^" +
-           ((std::ostringstream()) << exponent).str();
-}
-
-int Term::get_exponent() const { return exponent; }
 
 Term &Term::operator=(const Term &another) {
     if (&another != this) {
@@ -32,41 +24,124 @@ Term &Term::operator=(const Term &another) {
     return *this;
 }
 
-Term Term::operator+(const Term &another) {
+Term &Term::operator+=(const Term &another) {
+    assert(exponent == another.exponent && "Only terms with same degree can be added");
+
+    coefficient += another.coefficient;
+
+    return *this;
+}
+
+Term &Term::operator-=(const Term &another) {
+    assert(exponent == another.exponent && "Only terms with same degree can be subtracted");
+
+    coefficient -= another.coefficient;
+
+    return *this;
+}
+
+Term &Term::operator*=(const Term &another) {
+    coefficient *= another.coefficient;
+    exponent += another.exponent;
+
+    return *this;
+}
+
+Term Term::operator+(const Term &another) const {
     assert(exponent == another.exponent && "Only terms with same degree can be added");
 
     return Term(coefficient + another.coefficient, exponent);
 }
 
-Term Term::operator-(const Term &another) {
+Term Term::operator-(const Term &another) const {
     assert(exponent == another.exponent && "Only terms with same degree can be subtracted");
 
     return Term(coefficient - another.coefficient, exponent);
 }
 
+Term Term::operator*(const Term &another) const {
+    return Term(coefficient * another.coefficient, exponent + another.exponent);
+}
+
 Term Term::operator-() const { return Term(-coefficient, exponent); }
 
-std::ostream &operator<<(std::ostream &out, const Term &term) {
-    out << term.to_str();
-
-    return out;
+std::string Term::str() const {
+    return ((std::ostringstream()) << coefficient).str() + " * X^" +
+           ((std::ostringstream()) << exponent).str();
 }
+
+double Term::get_coefficient() const { return coefficient; }
+unsigned int Term::get_exponent() const { return exponent; }
+
+std::ostream &operator<<(std::ostream &out, const Term &term) { return (out << term.str()); }
 
 Term::~Term() {}
 
-Polynomial::Polynomial() : terms{Term()} {}
+Polynomial::Polynomial(std::string str) {
+    std::map<unsigned int, Term> terms;
 
-Polynomial::Polynomial(std::string str) { from_str(str); }
+    construct(terms, preprocess(str));
+
+    for (auto &i : terms) {
+        this->terms.push_back(i.second);
+    }
+}
+
+Polynomial::Polynomial(std::initializer_list<Term> args) {
+    std::map<unsigned int, Term> terms;
+
+    for (auto &arg : args) {
+        if (terms.contains(arg.get_exponent())) {
+            terms[arg.get_exponent()] += arg;
+        } else {
+            terms.emplace(arg.get_exponent(), arg);
+        }
+    }
+}
 
 Polynomial::Polynomial(const Polynomial &another) : terms{another.terms} {}
 
-void Polynomial::from_str(std::string str) { construct(preprocess(str)); }
+Polynomial &Polynomial::operator=(const Polynomial &another) {
+    if (&another != this) {
+        terms.clear();
 
-std::string Polynomial::to_str() {
+        for (auto &term : another.terms) {
+            terms.push_back(term);
+        }
+    }
+
+    return *this;
+}
+
+Polynomial &Polynomial::operator+=(const Polynomial &another) {
+    for (int i = 0; i < another.terms.size(); ++i) {
+        if (i < terms.size()) {
+            terms[i] += another.terms[i];
+        } else {
+            terms.push_back(another.terms[i]);
+        }
+    }
+
+    return *this;
+}
+
+Polynomial &Polynomial::operator-=(const Polynomial &another) {
+    for (int i = 0; i < another.terms.size(); ++i) {
+        if (i < terms.size()) {
+            terms[i] -= another.terms[i];
+        } else {
+            terms.push_back(-another.terms[i]);
+        }
+    }
+
+    return *this;
+}
+
+std::string Polynomial::str() {
     std::string result;
 
     for (int i = 0; i < terms.size(); ++i) {
-        result += terms[i].to_str();
+        result += terms[i].str();
 
         if (i + 1 < terms.size()) {
             result += " + ";
@@ -74,56 +149,6 @@ std::string Polynomial::to_str() {
     }
 
     return result;
-}
-
-void Polynomial::simplify() {
-    std::vector<Term> zeros;
-    std::vector<Term> firsts;
-    std::vector<Term> seconds;
-
-    for (auto &i : terms) {
-        switch (i.get_exponent()) {
-        case 0: {
-            zeros.push_back(i);
-
-            break;
-        }
-        case 1: {
-            firsts.push_back(i);
-
-            break;
-        }
-        case 2: {
-            seconds.push_back(i);
-
-            break;
-        }
-        default: {
-            break;
-        }
-        }
-    }
-
-    terms.clear();
-    if (zeros.size() > 0)
-        terms.push_back(sum(zeros));
-    if (firsts.size() > 0)
-        terms.push_back(sum(firsts));
-    if (seconds.size() > 0)
-        terms.push_back(sum(seconds));
-}
-
-Polynomial &Polynomial::operator=(const Polynomial &another) {
-    if (&another != this) {
-        terms.clear();
-        terms.resize(another.terms.capacity());
-
-        for (auto &i : another.terms) {
-            terms.push_back(i);
-        }
-    }
-
-    return *this;
 }
 
 Polynomial::~Polynomial() {}
@@ -142,30 +167,28 @@ std::string Polynomial::preprocess(std::string str) {
     return result;
 }
 
-void Polynomial::construct(std::string str) {
+void Polynomial::construct(std::map<unsigned int, Term> &terms, std::string str) {
     auto plus = str.find("+");
 
     if (plus != std::string::npos) {
-        terms.push_back(Term(str.substr(0, plus - 1)));
+        Term term(str.substr(0, plus - 1));
 
-        construct(str.substr(plus + 2, str.length()));
+        if (terms.contains(term.get_exponent())) {
+            terms[term.get_exponent()] += term;
+        } else {
+            terms.emplace(term.get_exponent(), term);
+        }
+
+        construct(terms, str.substr(plus + 2, str.length()));
     } else {
-        terms.push_back(Term(str));
+        Term term(str);
+
+        if (terms.contains(term.get_exponent())) {
+            terms[term.get_exponent()] += term;
+        } else {
+            terms.emplace(term.get_exponent(), term);
+        }
     }
-}
-
-Term Polynomial::sum(std::vector<Term> summands) {
-    if (summands.size() < 1) {
-        return Term();
-    }
-
-    Term result(0, summands[0].get_exponent());
-
-    for (auto &i : summands) {
-        result = result + i;
-    }
-
-    return result;
 }
 
 } // namespace polynomial
