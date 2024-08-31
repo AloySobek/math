@@ -1,7 +1,7 @@
 #include <cassert>
-#include <initializer_list>
 #include <iostream>
 #include <map>
+#include <ranges>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -26,6 +26,8 @@ class Term {
 
     Term operator-() const;
 
+    bool operator==(const Term &another) const;
+
     friend std::ostream &operator<<(std::ostream &out, const Term &term);
 
     // [-]C * X^E
@@ -44,21 +46,24 @@ class Term {
 class Polynomial {
   public:
     Polynomial(std::string str);
-    Polynomial(std::initializer_list<Term> args);
+    Polynomial(std::vector<Term> terms);
     Polynomial(const Polynomial &another);
 
     Polynomial &operator=(const Polynomial &another);
 
     Polynomial &operator+=(const Polynomial &another);
     Polynomial &operator-=(const Polynomial &another);
-    // Polynomial &operator*=(const Polynomial &another);
+    Polynomial &operator*=(const Polynomial &another);
 
     Polynomial operator+(const Polynomial &another) const;
     Polynomial operator-(const Polynomial &another) const;
-    // Polynomial operator*(const Polynomial &another) const;
+    Polynomial operator*(const Polynomial &another) const;
 
     Polynomial operator-() const;
 
+    friend std::ostream &operator<<(std::ostream &out, const Polynomial &polynomial);
+
+    // Term + Term + Term ...
     std::string str();
 
     ~Polynomial();
