@@ -65,6 +65,10 @@ Term Term::operator*(const Term &another) const {
 
 Term Term::operator-() const { return Term(-coefficient, exponent); }
 
+bool Term::operator==(const Term &another) const {
+    return coefficient == another.coefficient && exponent == another.exponent;
+}
+
 std::string Term::str() const {
     return ((std::ostringstream()) << coefficient).str() + " * X^" +
            ((std::ostringstream()) << exponent).str();
@@ -87,15 +91,19 @@ Polynomial::Polynomial(std::string str) {
     }
 }
 
-Polynomial::Polynomial(std::initializer_list<Term> args) {
-    std::map<unsigned int, Term> terms;
+Polynomial::Polynomial(std::vector<Term> input_terms) {
+    std::map<unsigned int, Term> grouped_terms;
 
-    for (auto &arg : args) {
-        if (terms.contains(arg.get_exponent())) {
-            terms[arg.get_exponent()] += arg;
+    for (Term &term : input_terms) {
+        if (grouped_terms.contains(term.get_exponent())) {
+            grouped_terms[term.get_exponent()] += term;
         } else {
-            terms.emplace(arg.get_exponent(), arg);
+            grouped_terms.emplace(term.get_exponent(), term);
         }
+    }
+
+    for (std::pair pair : grouped_terms) {
+        terms.push_back(pair.second);
     }
 }
 
@@ -125,6 +133,8 @@ Polynomial &Polynomial::operator+=(const Polynomial &another) {
     return *this;
 }
 
+// (3X^2 + x + 1)(7X^2 + 2x + 3) = 21x^4 + 6x^3 + 3x^2 + 7x^3 + 2x^2 +x
+
 Polynomial &Polynomial::operator-=(const Polynomial &another) {
     for (int i = 0; i < another.terms.size(); ++i) {
         if (i < terms.size()) {
@@ -135,6 +145,54 @@ Polynomial &Polynomial::operator-=(const Polynomial &another) {
     }
 
     return *this;
+}
+
+Polynomial &Polynomial::operator*=(const Polynomial &another) {
+    std::map<unsigned int, Term> t;
+
+    for (auto &i : terms) {
+        for (auto &j : another.terms) {
+            Term result = i + j;
+
+            if (t.contains(result.get_exponent())) {
+                t[result.get_exponent()] += result;
+            } else {
+                t.emplace(result.get_exponent(), result);
+            }
+        }
+    }
+
+    terms.clear();
+
+    for (auto &i : t) {
+        terms.push_back(i.second);
+    }
+
+    return *this;
+}
+
+Polynomial Polynomial::operator*(const Polynomial &another) const {
+    std::map<unsigned int, Term> t;
+
+    for (auto &i : terms) {
+        for (auto &j : another.terms) {
+            Term result = i + j;
+
+            if (t.contains(result.get_exponent())) {
+                t[result.get_exponent()] += result;
+            } else {
+                t.emplace(result.get_exponent(), result);
+            }
+        }
+    }
+
+    auto values = std::views::values(t);
+
+    std::vector<Term> test{values.begin(), values.end()};
+
+    std::initializer_list<Term> args;
+
+    return Polynomial(test);
 }
 
 std::string Polynomial::str() {
