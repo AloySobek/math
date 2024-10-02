@@ -51,8 +51,18 @@ class LinearEquation {
         if (slope >= 0.0f) {
             DrawLine(x, y, x2, y2, BLACK);
         } else {
-            DrawLine(x, ((double)HEIGHT / 2) - (y - ((double)HEIGHT / 2)), x2,
-                     ((double)HEIGHT / 2) + ((double)HEIGHT / 2) - y2, BLACK);
+            double middle = (double)HEIGHT / 2 - (intercept * 40);
+
+            y = middle - (y - middle);
+            if (y < 0.0f)
+                y = 0.0f;
+            y2 = (middle + middle) - y2;
+            if (y2 > HEIGHT)
+                y2 = HEIGHT;
+
+            DrawLine(WIDTH - x2, y, WIDTH - x, y2, BLACK);
+
+            std::cout << WIDTH - x2 << " | " << y << " | " << WIDTH - x << "| " << y2 << std::endl;
         }
     }
 
@@ -143,8 +153,8 @@ int main(void) {
             asc2 = true;
         }
 
-        slope += asc ? 0.1f : -0.1f;
-        intercept += asc2 ? 0.1f : -0.1f;
+        slope += asc ? 0.01f : -0.01f;
+        intercept += asc2 ? 0.01f : -0.01f;
         // // Updat
         // //----------------------------------------------------------------------------------
         // rotation += 0.2f;
@@ -186,7 +196,7 @@ int main(void) {
         // // NOTE: We draw all LINES based shapes together to optimize internal drawing,
         // // this way, all LINES are rendered in a single draw pass
         plane.draw();
-        LinearEquation(slope, intercept).draw();
+        LinearEquation(slope, 2.0f).draw();
         EndDrawing();
         //----------------------------------------------------------------------------------
     }
