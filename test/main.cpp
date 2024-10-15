@@ -1,5 +1,3 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
-#include <doctest.h>
 
-#include "test/test_complex.hpp"
-#include "test/test_polynomial.hpp"
+#include <doctest.h>

@@ -4,6 +4,18 @@
 #include <optional>
 #include <vector>
 
+class Vector {
+  public:
+    Vector(float x = 0.0f, float y = 0.0f) : x{x}, y{y} {}
+    Vector(Vector &other) : x{other.x}, y{other.y} {}
+
+    ~Vector() {}
+
+  private:
+    float x;
+    float y;
+};
+
 template <typename T, uint64_t N> class Vec {
   public:
     Vec() : v{N, 0} {}
