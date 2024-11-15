@@ -396,3 +396,4 @@ TSWLatexianTemp*
 #*Notes.bib
 
 .DS_Store
+doctest.h
